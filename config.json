@@ -1,0 +1,14 @@
+{
+    "TELEGRAM_BOT_TOKEN": "7668003362:AAHy1Fq6qSgVgo3c4imZ2E60zKi7SxMQhtw",
+    "TELEGRAM_CHAT_ID": "1516676847",
+    "START_TIME": "07:30",
+    "STOP_TIME_1": "12:30",
+    "RESUME_TIME": "13:00",
+    "STOP_TIME_2": "17:30",
+    "TASK_FILE": "tasks.json",
+    "ACCOUNT_ID": "c88f8341-5d9c-4668-b01d-2a84cbe87483",
+    "TOKEN_FILE": "token.json",
+    "BASE_URL": "https://api-qlda.hcmtelecom.vn",
+    "USERNAME": "danhdd.hcm",
+    "PASSWORD": "Danh@20123"
+}
