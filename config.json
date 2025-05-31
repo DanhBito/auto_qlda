@@ -1,14 +1,103 @@
 {
-    "TELEGRAM_BOT_TOKEN": "7668003362:AAHy1Fq6qSgVgo3c4imZ2E60zKi7SxMQhtw",
-    "TELEGRAM_CHAT_ID": "1516676847",
-    "START_TIME": "07:30",
-    "STOP_TIME_1": "12:30",
-    "RESUME_TIME": "13:00",
-    "STOP_TIME_2": "17:30",
-    "TASK_FILE": "tasks.json",
-    "ACCOUNT_ID": "c88f8341-5d9c-4668-b01d-2a84cbe87483",
-    "TOKEN_FILE": "token.json",
-    "BASE_URL": "https://api-qlda.hcmtelecom.vn",
-    "USERNAME": "danhdd.hcm",
-    "PASSWORD": "Danh@20123"
+  "TELEGRAM_BOT_TOKEN": "7668003362:AAHy1Fq6qSgVgo3c4imZ2E60zKi7SxMQhtw",
+  "TELEGRAM_CHAT_ID": "1516676847",
+  "START_TIME": "07:30",
+  "STOP_TIME_1": "12:30",
+  "RESUME_TIME": "13:00",
+  "STOP_TIME_2": "17:30",
+  "TASK_FILE": "tasks.json",
+  "ACCOUNT_ID": "c88f8341-5d9c-4668-b01d-2a84cbe87483",
+  "TOKEN_FILE": "token.json",
+  "BASE_URL": "https://api-qlda.hcmtelecom.vn",
+  "USERNAME": "danhdd.hcm",
+  "PASSWORD": "Danh@20123",
+  "SPREADSHEET_ID": "1mP1fk_xg4amC3g8tU72lTIpvhFLUkTegrBr937x99h8",
+  "SHEET_NAME": "Timekeeping",
+  "SERVICE_ACCOUNT_FILE": "credentials.json",
+  "SERVICE_ACCOUNT_SCOPES": "https://www.googleapis.com/auth/spreadsheets",
+  "USERS": [
+    {
+      "name": "Phạm Quang Long",
+      "id": "23a8d661-8bbc-457e-8cd6-3cc1fe8b6158",
+      "code": "HCM021534",
+      "actual_hour": 155.02
+    },
+    {
+      "name": "Dương Duy Danh",
+      "id": "c88f8341-5d9c-4668-b01d-2a84cbe87483",
+      "code": "HCM021292",
+      "actual_hour": 155.34
+    },
+    {
+      "name": "Lê Hoàng Anh",
+      "id": "fa202a14-75bd-4118-9ad3-784d097a757f",
+      "code": "HCM021533",
+      "actual_hour": 156.56
+    },
+    {
+      "name": "Nguyễn Tấn Tài",
+      "id": "e9a8ea85-a711-4d66-8b38-a477d828d2c2",
+      "code": "CTV083324",
+      "actual_hour": 119.69
+    },
+    {
+      "name": "Nguyễn Minh Mẫn",
+      "id": "b74c8690-7726-4187-a9cc-fc59f5b941e0",
+      "code": "HCM021130",
+      "actual_hour": 160.07
+    },
+    {
+      "name": "Lê Thị Thùy Dương",
+      "id": "6ba8b33e-4726-401c-9c36-fb0cf6cd6042",
+      "code": "CTV073000",
+      "actual_hour": 142.99
+    },
+    {
+      "name": "Võ Minh Hiển",
+      "id": "5138b217-fd9f-4775-8ad3-96a739eb698d",
+      "code": "HCM021536",
+      "actual_hour": 126.11
+    },
+    {
+      "name": "Giang Văn Siêu",
+      "id": "88d4e4d0-a733-4bca-aee1-d737bcb84084",
+      "code": "HCM021271",
+      "actual_hour": 179.17
+    },
+    {
+      "name": "Đỗ Ngọc Tấn",
+      "id": "0207f9c2-97a9-42ba-90b2-605d37c2b5e2",
+      "code": "HCM021110",
+      "actual_hour": 15.13
+    },
+    {
+      "name": "Vũ Thị Thơm",
+      "id": "e75c898e-fce6-410d-830e-f746ef1680f9",
+      "code": "HCM021515",
+      "actual_hour": 158.56
+    },
+    {
+      "name": "Phạm Hồng Thái",
+      "id": "128a2ae1-67a3-48f9-864f-069f99d0ecbc",
+      "code": "CTV088631",
+      "actual_hour": 146.85
+    },
+    {
+      "name": "Phan Minh Tuấn",
+      "id": "b8dd2cb3-c92a-4425-99c4-39471fc35402",
+      "code": "CTV074603",
+      "actual_hour": 164.37
+    },
+    {
+      "name": "Phan Nguyễn",
+      "id": "5c0878b3-d84c-469a-82c4-d371630e52ee",
+      "code": "CTV083937",
+      "actual_hour": 192.3
+    },
+    {
+        "name": "Trần An Khang",
+        "id": "e6df3e4e-523c-4647-9e5b-04794194309e",
+        "code": "HCM020977"
+    }
+  ]
 }
