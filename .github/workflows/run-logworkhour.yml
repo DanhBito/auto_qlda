@@ -2,7 +2,7 @@ name: Run LogWorkHour Script
 
 on:
   schedule:
-    - cron: "0 0,6,12 * * 1-5"  # 7h, 13h, 19h giờ VN (tức 0h, 6h, 12h UTC)
+    - cron: "0 0,6,12 * * 1-5"  # 7h, 13h, 19h VN time (0h, 6h, 12h UTC)
   workflow_dispatch:
 
 jobs:
@@ -23,12 +23,12 @@ jobs:
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-      - name: Check if GOOGLE_CREDENTIALS variable is set
-        run: |
-          if [ -z "${{ vars.GOOGLE_CREDENTIALS }}" ]; then
-            echo "Error: GOOGLE_CREDENTIALS variable is not set."
-            exit 1
-          fi
+      # - name: Check if GOOGLE_CREDENTIALS variable is set
+      #   run: |
+      #     if [ -z "${{ vars.GOOGLE_CREDENTIALS }}" ]; then
+      #       echo "Error: GOOGLE_CREDENTIALS variable is not set."
+      #       exit 1
+      #     fi
 
       - name: Restore Google credentials from variable
         run: |
