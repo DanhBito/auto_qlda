@@ -32,7 +32,7 @@ jobs:
 
       - name: Restore Google credentials from variable
         run: |
-          printf "%s" "${{ vars.GOOGLE_CREDENTIALS }}" > credentials.json
+          echo "${{ vars.GOOGLE_CREDENTIALS }}" > credentials.json
 
       - name: Run Python script
         run: python logWorkHour.py
