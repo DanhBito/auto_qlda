@@ -15,11 +15,13 @@ async def main():
     month = datetime.now().strftime("%m/%Y")
 
     if config.get("SERVICE_ACCOUNT_INFO"):
+        print("SERVICE_ACCOUNT_INFO is exist!!!")
         creds = Credentials.from_service_account_info(
             config["SERVICE_ACCOUNT_INFO"],
             scopes=[config.get("SERVICE_ACCOUNT_SCOPES")]
         )
     else:
+        print("SERVICE_ACCOUNT_INFO is not exist!!!")
         creds = Credentials.from_service_account_file(
             config["SERVICE_ACCOUNT_FILE"],
             scopes=[config.get("SERVICE_ACCOUNT_SCOPES")]
