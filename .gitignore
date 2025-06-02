@@ -77,7 +77,7 @@ dmypy.json
 
 # Credentials or keys (recommended to store securely)
 credentials.json
-client_secret.json
+token.json
 
 # macOS
 .DS_Store

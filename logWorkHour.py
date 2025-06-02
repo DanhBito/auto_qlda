@@ -14,10 +14,16 @@ async def main():
 
     month = datetime.now().strftime("%m/%Y")
 
-    creds = Credentials.from_service_account_file(
-        config.get("SERVICE_ACCOUNT_FILE"),
-        scopes=[config.get("SERVICE_ACCOUNT_SCOPES")]
-    )
+    if config.get("SERVICE_ACCOUNT_INFO"):
+        creds = Credentials.from_service_account_info(
+            config["SERVICE_ACCOUNT_INFO"],
+            scopes=[config.get("SERVICE_ACCOUNT_SCOPES")]
+        )
+    else:
+        creds = Credentials.from_service_account_file(
+            config["SERVICE_ACCOUNT_FILE"],
+            scopes=[config.get("SERVICE_ACCOUNT_SCOPES")]
+        )
 
     client = gspread.authorize(creds)
     sheet = client.open_by_key(config.get("SPREADSHEET_ID")).worksheet(config.get("SHEET_NAME"))
@@ -41,7 +47,7 @@ async def main():
 
     update_values = [[user_map.get(code, "")] for code in code_list]
 
-    sheet.update("E4:E18", update_values)
+    sheet.update("F4:F18", update_values)
 
     print("✅ Đã cập nhật thời gian thực hiện vào Google Sheet.")
 
