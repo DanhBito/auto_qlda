@@ -1,4 +1,3 @@
-import json
 import asyncio
 from datetime import datetime
 import gspread
@@ -12,10 +11,6 @@ async def search_detail_by_month(month, assignee_id):
     return response
 
 async def main():
-    from datetime import datetime
-    import json
-    import gspread
-    from google.oauth2.service_account import Credentials
 
     month = datetime.now().strftime("%m/%Y")
 
@@ -36,7 +31,7 @@ async def main():
         result = await search_detail_by_month(month, user_id)
         print(f"📊 Result for {user_name}:", result)
 
-        actual_hours = result["Data"][0]["ActualHourNums"] if result["Status"] == 1 and result["Data"] else 0
+        actual_hours = result["Data"][0]["ActualHourNums"] if result["Status"]  == 1 and result["Data"] else 0
         user['actual_hour'] = actual_hours
 
     code_range = sheet.get("B4:B18")
