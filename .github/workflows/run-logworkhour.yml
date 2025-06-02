@@ -23,9 +23,16 @@ jobs:
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-      - name: Restore Google credentials from secret
+      - name: Check if GOOGLE_CREDENTIALS variable is set
         run: |
-          echo "${{ secrets.GOOGLE_CREDENTIALS }}" > credentials.json
+          if [ -z "${{ vars.GOOGLE_CREDENTIALS }}" ]; then
+            echo "Error: GOOGLE_CREDENTIALS variable is not set."
+            exit 1
+          fi
+
+      - name: Restore Google credentials from variable
+        run: |
+          printf "%s" "${{ vars.GOOGLE_CREDENTIALS }}" > credentials.json
 
       - name: Run Python script
         run: python logWorkHour.py
