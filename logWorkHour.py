@@ -11,7 +11,7 @@ import urllib.parse
 RUN_TIMES = [
     time(7, 0), # 7h sáng
     time(13, 0), # 13h chiều
-    time(16, 27), # 15h chiều
+    time(16, 52), # 15h chiều
     time(19, 0), # 19h tối
 ]
 
@@ -42,7 +42,15 @@ async def GetAverageQualityOfWork(assignee_id):
     encoded_uids = urllib.parse.quote(json.dumps([assignee_id]))
     endpoint = f"/api/DashboardDev/GetAverageQualityOfWork?month={month}&year={year}&uids={encoded_uids}"
     response = await call_api(endpoint)
-    return response    
+    return response 
+
+async def GetChartTaskByJobType(assignee_id):
+    month = datetime.now().strftime("%m")
+    year = datetime.now().strftime("%Y")
+    encoded_uids = urllib.parse.quote(json.dumps([assignee_id]))
+    endpoint = f"/api/DashboardDev/GetChartTaskByJobType?month={month}&year={year}&uids={encoded_uids}"
+    response = await call_api(endpoint)
+    return response         
 
 
 async def run_task_search_detail_log_work_team_by_current_month():
@@ -107,6 +115,9 @@ async def run_task_search_detail_by_month():
         result_quality_work = await GetAverageQualityOfWork(user_id)
         print(f"📊 Kết quả TB chất lượng việc đã hoàn thành cho {user_name}:", result_overdue_task)
 
+        result_task = await GetChartTaskByJobType(user_id)
+        print(f"📊 Kết quả task cho {user_name}:", result_task)
+
         quality_value = 0
         if result_quality_work and result_quality_work.get("Status") == 1:
             data = result_quality_work.get("Data", [])
@@ -117,10 +128,33 @@ async def run_task_search_detail_by_month():
 
         actual_hours = result["Data"][0]["ActualHourNums"] if result["Status"] == 1 and result["Data"] else 0
         count_overdue = result_overdue_task["Data"]["CountOverDue"] if result_overdue_task["Status"] == 1 else 0
-        
+
+        total_task_on_time = 0
+        if result_task and result_task.get("Status") == 1:
+            data = result_task.get("Data", [])
+            if isinstance(data, list):
+                total_task_on_time = sum(
+                    item.get("NumberTaskDetail", {}).get("NumberOnTime", 0)
+                    for item in data
+                    if isinstance(item.get("NumberTaskDetail", {}).get("NumberOnTime", None), int)
+                )
+
+        total_task_late_time = 0
+        if result_task and result_task.get("Status") == 1:
+            data = result_task.get("Data", [])
+            if isinstance(data, list):
+                total_task_late_time = sum(
+                    item.get("NumberTaskDetail", {}).get("NumberLateTime", 0)
+                    for item in data
+                    if isinstance(item.get("NumberTaskDetail", {}).get("NumberLateTime", None), int)
+                )        
+                
         user['actual_hour'] = actual_hours
         user['count_overdue'] = count_overdue
         user['result_quality_work'] = quality_value
+        user['total_task_on_time'] = total_task_on_time
+        user['total_task_late_time'] = total_task_late_time
+
 
     code_range = sheet.get("B4:B16")
     code_list = [row[0] if row else "" for row in code_range]
@@ -128,10 +162,16 @@ async def run_task_search_detail_by_month():
     user_map_actual = {user["code"]: user.get("actual_hour", "") for user in users}
     user_map_overdue = {user["code"]: user.get("count_overdue", "") for user in users}
     user_map_quality_work = {user["code"]: user.get("result_quality_work", "") for user in users}
+    user_map_total_task_on_time = {user["code"]: user.get("total_task_on_time", "") for user in users}
+    user_map_total_task_late_time = {user["code"]: user.get("total_task_late_time", "") for user in users}
+
 
     update_values_actual = [[user_map_actual.get(code, "")] for code in code_list]
     update_values_overdue = [[user_map_overdue.get(code, "")] for code in code_list]
     update_values_quality_work = [[user_map_quality_work.get(code, "")] for code in code_list]
+    update_values_total_task_on_time = [[user_map_total_task_on_time.get(code, "")] for code in code_list]
+    update_values_total_task_late_time = [[user_map_total_task_late_time.get(code, "")] for code in code_list]
+
 
     # Cập nhật thời gian thực hiện
     sheet.update("F4:F16", update_values_actual)
@@ -141,6 +181,12 @@ async def run_task_search_detail_by_month():
 
     # Cập nhật chất lượng việc đã hoàn thành
     sheet.update("I4:I16", update_values_quality_work)
+
+    # Cập nhật tổng số task đúng hạn
+    sheet.update("G4:G16", update_values_total_task_on_time)
+
+    # Cập nhật tổng số task trễ hạn (theo chi tiết)
+    sheet.update("H4:H16", update_values_total_task_late_time)
 
     print("✅ Đã cập nhật vào Google Sheet.")
 
