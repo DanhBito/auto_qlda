@@ -4,6 +4,8 @@ import gspread
 from google.oauth2.service_account import Credentials
 from config import config
 from utils import call_api
+import json
+import urllib.parse
 
 # Danh sách thời điểm cần chạy (dạng datetime.time)
 RUN_TIMES = [
@@ -24,6 +26,15 @@ async def search_detail_log_work_team_by_current_month():
     endpoint = f"/api/DashboardQLCV/SearchPersonWorkByDate?searchText=&fromDate={fromDate}&toDate={toDate}&UnitID=&assigneeIDs=%5B%5D"
     response = await call_api(endpoint)
     return response
+
+async def search_overdue_task_by_month(assignee_id):
+    month = datetime.now().strftime("%m")
+    year = datetime.now().strftime("%Y")
+    encoded_uids = urllib.parse.quote(json.dumps([assignee_id]))
+    endpoint = f"/api/DashboardDev/GetAverageQualityOfTreeMonth?month={month}&year={year}&uids={encoded_uids}"
+    response = await call_api(endpoint)
+    return response
+
 
 async def run_task_search_detail_log_work_team_by_current_month():
     print(f"🚀 Bắt đầu chạy tác vụ lúc {datetime.now().strftime('%H:%M:%S')}")
@@ -81,19 +92,30 @@ async def run_task_search_detail_by_month():
         result = await search_detail_by_month(month, user_id)
         print(f"📊 Kết quả cho {user_name}:", result)
 
+        result_overdue_task = await search_overdue_task_by_month(user_id)
+        print(f"📊 Kết quả task trễ hạn cho {user_name}:", result_overdue_task)
+
         actual_hours = result["Data"][0]["ActualHourNums"] if result["Status"] == 1 and result["Data"] else 0
+        count_overdue = result_overdue_task["Data"]["CountOverDue"] if result_overdue_task["Status"] == 1 and "Data" in result_overdue_task else 0
         user['actual_hour'] = actual_hours
+        user['count_overdue'] = count_overdue
 
     code_range = sheet.get("B4:B16")
     code_list = [row[0] if row else "" for row in code_range]
 
-    user_map = {user["code"]: user.get("actual_hour", "") for user in config.get("USERS")}
+    user_map_actual = {user["code"]: user.get("actual_hour", "") for user in users}
+    user_map_overdue = {user["code"]: user.get("count_overdue", "") for user in users}
 
-    update_values = [[user_map.get(code, "")] for code in code_list]
+    update_values_actual = [[user_map_actual.get(code, "")] for code in code_list]
+    update_values_overdue = [[user_map_overdue.get(code, "")] for code in code_list]
 
-    sheet.update("F4:F16", update_values)
+    # Cập nhật thời gian thực hiện
+    sheet.update("F4:F16", update_values_actual)
 
-    print("✅ Đã cập nhật thời gian thực hiện vào Google Sheet.")
+    # Cập nhật số lượng task trễ hạn
+    sheet.update("J4:J16", update_values_overdue)
+
+    print("✅ Đã cập nhật thời gian thực hiện và số task trễ hạn vào Google Sheet.")
 
 async def scheduler():
     while True:
