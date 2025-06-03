@@ -11,6 +11,7 @@ import urllib.parse
 RUN_TIMES = [
     time(7, 0), # 7h sáng
     time(13, 0), # 13h chiều
+    time(16, 27), # 15h chiều
     time(19, 0), # 19h tối
 ]
 
@@ -34,6 +35,14 @@ async def search_overdue_task_by_month(assignee_id):
     endpoint = f"/api/DashboardDev/GetAverageQualityOfTreeMonth?month={month}&year={year}&uids={encoded_uids}"
     response = await call_api(endpoint)
     return response
+
+async def GetAverageQualityOfWork(assignee_id):
+    month = datetime.now().strftime("%m")
+    year = datetime.now().strftime("%Y")
+    encoded_uids = urllib.parse.quote(json.dumps([assignee_id]))
+    endpoint = f"/api/DashboardDev/GetAverageQualityOfWork?month={month}&year={year}&uids={encoded_uids}"
+    response = await call_api(endpoint)
+    return response    
 
 
 async def run_task_search_detail_log_work_team_by_current_month():
@@ -95,19 +104,34 @@ async def run_task_search_detail_by_month():
         result_overdue_task = await search_overdue_task_by_month(user_id)
         print(f"📊 Kết quả task trễ hạn cho {user_name}:", result_overdue_task)
 
+        result_quality_work = await GetAverageQualityOfWork(user_id)
+        print(f"📊 Kết quả TB chất lượng việc đã hoàn thành cho {user_name}:", result_overdue_task)
+
+        quality_value = 0
+        if result_quality_work and result_quality_work.get("Status") == 1:
+            data = result_quality_work.get("Data", [])
+            if isinstance(data, list) and len(data) > 0:
+                ratings = [item.get("AverageRating", 0) for item in data if isinstance(item.get("AverageRating", None), (int, float))]
+                if ratings:
+                    quality_value = round(sum(ratings) / len(ratings), 2)
+
         actual_hours = result["Data"][0]["ActualHourNums"] if result["Status"] == 1 and result["Data"] else 0
-        count_overdue = result_overdue_task["Data"]["CountOverDue"] if result_overdue_task["Status"] == 1 and "Data" in result_overdue_task else 0
+        count_overdue = result_overdue_task["Data"]["CountOverDue"] if result_overdue_task["Status"] == 1 else 0
+        
         user['actual_hour'] = actual_hours
         user['count_overdue'] = count_overdue
+        user['result_quality_work'] = quality_value
 
     code_range = sheet.get("B4:B16")
     code_list = [row[0] if row else "" for row in code_range]
 
     user_map_actual = {user["code"]: user.get("actual_hour", "") for user in users}
     user_map_overdue = {user["code"]: user.get("count_overdue", "") for user in users}
+    user_map_quality_work = {user["code"]: user.get("result_quality_work", "") for user in users}
 
     update_values_actual = [[user_map_actual.get(code, "")] for code in code_list]
     update_values_overdue = [[user_map_overdue.get(code, "")] for code in code_list]
+    update_values_quality_work = [[user_map_quality_work.get(code, "")] for code in code_list]
 
     # Cập nhật thời gian thực hiện
     sheet.update("F4:F16", update_values_actual)
@@ -115,7 +139,10 @@ async def run_task_search_detail_by_month():
     # Cập nhật số lượng task trễ hạn
     sheet.update("J4:J16", update_values_overdue)
 
-    print("✅ Đã cập nhật thời gian thực hiện và số task trễ hạn vào Google Sheet.")
+    # Cập nhật chất lượng việc đã hoàn thành
+    sheet.update("I4:I16", update_values_quality_work)
+
+    print("✅ Đã cập nhật vào Google Sheet.")
 
 async def scheduler():
     while True:
