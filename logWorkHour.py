@@ -9,7 +9,7 @@ from utils import call_api
 RUN_TIMES = [
     time(7, 0), # 7h sáng
     time(13, 0), # 13h chiều
-    time(19, 0) # 19h tối
+    time(19, 0), # 19h tối
 ]
 
 async def search_detail_by_month(month, assignee_id):
@@ -17,7 +17,49 @@ async def search_detail_by_month(month, assignee_id):
     response = await call_api(endpoint)
     return response
 
-async def run_task():
+async def search_detail_log_work_team_by_current_month():
+    now = datetime.now()
+    fromDate = datetime(now.year, now.month, 1).strftime('%Y-%m-%dT00:00:00')
+    toDate = datetime(now.year, now.month, now.day).strftime('%Y-%m-%dT00:00:00')
+    endpoint = f"/api/DashboardQLCV/SearchPersonWorkByDate?searchText=&fromDate={fromDate}&toDate={toDate}&UnitID=&assigneeIDs=%5B%5D"
+    response = await call_api(endpoint)
+    return response
+
+async def run_task_search_detail_log_work_team_by_current_month():
+    print(f"🚀 Bắt đầu chạy tác vụ lúc {datetime.now().strftime('%H:%M:%S')}")
+
+    result = await search_detail_log_work_team_by_current_month()
+    print("📊 Kết quả Thống kê công việc của nhóm là: ", result)
+
+    creds = Credentials.from_service_account_file(
+        config["SERVICE_ACCOUNT_FILE"],
+        scopes=[config.get("SERVICE_ACCOUNT_SCOPES")]
+    )
+
+    client = gspread.authorize(creds)
+    sheet = client.open_by_key(config.get("SPREADSHEET_ID")).worksheet(config.get("SHEET_NAME"))
+
+    username = sheet.get("D4:D16")
+    username_list = [row[0] if row else "" for row in username]
+
+    data_map = {user["AssigneeName"]: user for user in result["Data"]}
+
+    values_total_task = [[data_map.get(name, {}).get("TotalTask", "")] for name in username_list]
+    values_total_hour = [[data_map.get(name, {}).get("TotalHourNum", "")] for name in username_list]
+    # values_wait_review = [[data_map.get(name, {}).get("TotalTaskWaitReview", "")] for name in username_list]
+    values_done = [[data_map.get(name, {}).get("TotalTaskDone", "")] for name in username_list]
+    values_not_done = [[data_map.get(name, {}).get("TotalTaskNotDone", "")] for name in username_list]
+
+    sheet.update("K4:K16", values_total_task)
+    sheet.update("L4:L16", values_total_hour)
+    # sheet.update("O4:O16", values_wait_review)
+    sheet.update("M4:M16", values_done)
+    sheet.update("N4:N16", values_not_done)
+
+    print("✅ Đã cập nhật đầy đủ các thống kê công việc của nhóm theo từng cột.")
+
+       
+async def run_task_search_detail_by_month():
     print(f"🚀 Bắt đầu chạy tác vụ lúc {datetime.now().strftime('%H:%M:%S')}")
 
     month = datetime.now().strftime("%m/%Y")
@@ -42,14 +84,14 @@ async def run_task():
         actual_hours = result["Data"][0]["ActualHourNums"] if result["Status"] == 1 and result["Data"] else 0
         user['actual_hour'] = actual_hours
 
-    code_range = sheet.get("B4:B18")
+    code_range = sheet.get("B4:B16")
     code_list = [row[0] if row else "" for row in code_range]
 
     user_map = {user["code"]: user.get("actual_hour", "") for user in config.get("USERS")}
 
     update_values = [[user_map.get(code, "")] for code in code_list]
 
-    sheet.update("F4:F18", update_values)
+    sheet.update("F4:F16", update_values)
 
     print("✅ Đã cập nhật thời gian thực hiện vào Google Sheet.")
 
@@ -67,7 +109,8 @@ async def scheduler():
         wait_seconds = (next_run - now).total_seconds()
         print(f"⏳ Chờ đến {next_run.strftime('%H:%M:%S')} để chạy task tiếp theo...")
         await asyncio.sleep(wait_seconds)
-        await run_task()
+        await run_task_search_detail_by_month()
+        await run_task_search_detail_log_work_team_by_current_month()
 
 if __name__ == "__main__":
     try:
