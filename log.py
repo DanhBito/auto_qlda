@@ -1,19 +1,11 @@
 import asyncio
-from datetime import datetime, time, timedelta
+from datetime import datetime
 import gspread
 from google.oauth2.service_account import Credentials
 from config import config
 from utils import call_api
 import json
 import urllib.parse
-
-# Danh sách thời điểm cần chạy (dạng datetime.time)
-RUN_TIMES = [
-    time(8, 43), # 7h sáng
-    time(13, 0), # 13h chiều
-    time(16, 52), # 15h chiều
-    time(19, 0), # 19h tối
-]
 
 async def search_detail_by_month(month, assignee_id):
     endpoint = f"/api/DashboardQLCV/SearchDetailByMonth?month={month}&assigneeIDs={assignee_id}"
@@ -74,13 +66,11 @@ async def run_task_search_detail_log_work_team_by_current_month():
 
     values_total_task = [[data_map.get(name, {}).get("TotalTask", "")] for name in username_list]
     values_total_hour = [[data_map.get(name, {}).get("TotalHourNum", "")] for name in username_list]
-    # values_wait_review = [[data_map.get(name, {}).get("TotalTaskWaitReview", "")] for name in username_list]
     values_done = [[data_map.get(name, {}).get("TotalTaskDone", "")] for name in username_list]
     values_not_done = [[data_map.get(name, {}).get("TotalTaskNotDone", "")] for name in username_list]
 
     sheet.update("K4:K16", values_total_task)
     sheet.update("L4:L16", values_total_hour)
-    # sheet.update("O4:O16", values_wait_review)
     sheet.update("M4:M16", values_done)
     sheet.update("N4:N16", values_not_done)
 
@@ -190,25 +180,10 @@ async def run_task_search_detail_by_month():
 
     print("✅ Đã cập nhật vào Google Sheet.")
 
-async def scheduler():
-    while True:
-        now = datetime.now()
-
-        today_run_times = [datetime.combine(now.date(), t) for t in RUN_TIMES]
-
-        next_run = next((t for t in today_run_times if t > now), None)
-
-        if not next_run:
-            next_run = datetime.combine(now.date() + timedelta(days=1), RUN_TIMES[0])
-
-        wait_seconds = (next_run - now).total_seconds()
-        print(f"⏳ Chờ đến {next_run.strftime('%H:%M:%S')} để chạy task tiếp theo...")
-        await asyncio.sleep(wait_seconds)
-        await run_task_search_detail_by_month()
-        await run_task_search_detail_log_work_team_by_current_month()
-
 if __name__ == "__main__":
     try:
-        asyncio.run(scheduler())
-    except KeyboardInterrupt:
-        print("\n🛑 Đã dừng chương trình.")
+        asyncio.run(run_task_search_detail_by_month())
+        asyncio.run(run_task_search_detail_log_work_team_by_current_month())
+        print("✅ Hoàn tất chạy tất cả tác vụ.")
+    except Exception as e:
+        print(f"❌ Đã xảy ra lỗi: {e}")
