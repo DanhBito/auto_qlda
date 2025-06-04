@@ -9,9 +9,8 @@ import urllib.parse
 
 # Danh sách thời điểm cần chạy (dạng datetime.time)
 RUN_TIMES = [
-    time(8, 43), # 7h sáng
+    time(7, 0), # 7h sáng
     time(13, 0), # 13h chiều
-    time(16, 52), # 15h chiều
     time(19, 0), # 19h tối
 ]
 
